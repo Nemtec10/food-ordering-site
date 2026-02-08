@@ -226,3 +226,4 @@ body{
 .ai-input:focus{
   border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
 }
+
