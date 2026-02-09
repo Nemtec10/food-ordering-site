@@ -105,10 +105,10 @@
       </button>
       <div class="ai-panel" id="ai-panel" role="dialog" aria-label="Netfoodix AI companion">
         <header class="ai-header">
-          <div>
-            <p class="ai-title">Netfoodix AI Companion</p>
-            <p class="ai-subtitle">Ask about features, pricing, or support.</p>
-          </div>
+          <div>␊
+            <p class="ai-title">Netfoodix AI Companion</p>␊
+            <p class="ai-subtitle">Ask questions or generate images with Netfoodix AI.</p>
+          </div>␊
           <button class="ai-close" type="button" aria-label="Close chat">✕</button>
         </header>
         <div class="ai-messages" role="log" aria-live="polite">
@@ -116,6 +116,15 @@
             Hi! I can help you learn about Netfoodix features, ordering steps, and support options. What would you like to know?
           </div>
         </div>
+        <form class="ai-form">
+          <select class="ai-mode" name="mode" aria-label="AI mode">
+            <option value="chat" selected>Chat</option>
+            <option value="image">Image</option>
+          </select>
+          <input class="ai-input" type="text" name="message" placeholder="Ask about delivery, pricing, or support..." required />
+          <button class="ai-send" type="submit">Send</button>
+        </form>
+      </div>
         <form class="ai-form">
           <div class="ai-mode" role="group" aria-label="AI mode">
             <label class="ai-mode__option">
@@ -250,4 +259,3 @@
 </script>
 </body>
 </html>
-
