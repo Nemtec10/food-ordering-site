@@ -85,6 +85,14 @@
       <h3>OUR VISION</h3>
       <p>Our vision is to become the leading global food ordering platform, recognized for innovation, reliability, and exceptional user experience. We envision a future where our app is the go-to solution for food lovers everywhere, fostering a vibrant community of customers and restaurant partners. Through continuous improvement and adaptation to emerging technologies, we aspire to set new standards in the food delivery industry and make dining more accessible and enjoyable for all.</p>
     </article>
+    <h3>Live Website</h3>
+      <p class="text-muted">
+        Once GitHub Pages is enabled, our site will be live at:
+        <a class="live-link__anchor" href="https://YOUR-USERNAME.github.io/food-ordering-site/" target="_blank" rel="noopener">
+          https://Nemtec10.github.io/food-ordering-site/
+        </a>
+      </p>
+    </section>
     <div style="display:flex;gap:12px">
       <a href="Netfoodix.html"><button class="btn btn-primary">To Netfoodix</button></a>
       <a href="HOME.html"><button class="btn btn-primary">Next to HOME</button></a>
@@ -107,16 +115,136 @@
           </div>
         </div>
         <form class="ai-form">
+          <div class="ai-mode" role="group" aria-label="AI mode">
+            <label class="ai-mode__option">
+              <input type="radio" name="mode" value="chat" checked />
+              Ask
+            </label>
+            <label class="ai-mode__option">
+              <input type="radio" name="mode" value="image" />
+              Image
+            </label>
+          </div>
           <input class="ai-input" type="text" name="message" placeholder="Ask about delivery, pricing, or support..." required />
           <button class="ai-send" type="submit">Send</button>
         </form>
       </div>
     </section>
+    <section class="auth-modal" aria-hidden="true">
+      <div class="auth-modal__backdrop" data-auth-close></div>
+      <div class="auth-modal__panel" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <header class="auth-modal__header">
+          <h3 id="auth-title">Welcome back</h3>
+          <button class="auth-modal__close" type="button" data-auth-close aria-label="Close sign-in">✕</button>
+        </header>
+        <p class="text-muted auth-modal__subtitle">Sign in to access your orders, saved restaurants, and rewards.</p>
+        <form class="auth-form">
+          <label class="auth-form__field">
+            Email
+            <input class="input" type="email" name="email" placeholder="you@example.com" required />
+          </label>
+          <label class="auth-form__field">
+            Password
+            <input class="input" type="password" name="password" placeholder="Enter your password" required />
+          </label>
+          <button class="btn btn-primary" type="submit">Continue</button>
+        </form>
+        <p class="text-muted auth-modal__switch">
+          New here? <button class="auth-modal__link" type="button" data-auth-switch="signup">Create an account</button>
+        </p>
+      </div>
+    </section>
+<div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);">
+  <div style="max-width:420px; margin:10% auto; background:#111827; color:white; padding:18px; border-radius:14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0;">Login</h3>
+      <button id="closeLogin" style="background:transparent; color:white; border:none; font-size:18px;">✕</button>
+    </div>
+
+    <form id="loginForm" style="margin-top:12px; display:grid; gap:10px;">
+      <input id="email" type="email" placeholder="Email" required style="padding:10px; border-radius:10px; border:1px solid #374151;">
+      <input id="password" type="password" placeholder="Password" required style="padding:10px; border-radius:10px; border:1px solid #374151;">
+      <button type="submit" style="padding:10px; border-radius:10px; border:none;">Login</button>
+      <p id="loginMsg" style="margin:0; color:#fca5a5;"></p>
+    </form>
+  </div>
+</div>
+
     <footer class="footer">
       <div class="text-muted">© 2028 </div>
       <div class="text-muted">Made with <span class="badge">Nemtec</span></div>
     </footer>
   </div>
   <script src="ai-companion.js"></script>
+  <script src="theme-toggle.js"></script>
+  <script src="auth-modal.js"></script>
+  <script>
+  const loginBtn = document.getElementById("loginBtn");
+  const aiBtn = document.getElementById("aiBtn");
+  const loginModal = document.getElementById("loginModal");
+  const closeLogin = document.getElementById("closeLogin");
+  const loginForm = document.getElementById("loginForm");
+  const loginMsg = document.getElementById("loginMsg");
+
+  // ---- Simple login state (demo) ----
+  // Later we’ll replace this with real backend auth.
+  const isLoggedIn = () => localStorage.getItem("netfoodix_logged_in") === "true";
+
+  function updateUI() {
+    if (isLoggedIn()) {
+      aiBtn.disabled = false;
+      aiBtn.style.opacity = "1";
+    } else {
+      aiBtn.disabled = true;
+      aiBtn.style.opacity = "0.6";
+    }
+  }
+
+  // Open modal
+  loginBtn.addEventListener("click", () => {
+    loginMsg.textContent = "";
+    loginModal.style.display = "block";
+  });
+
+  // Close modal
+  closeLogin.addEventListener("click", () => {
+    loginModal.style.display = "none";
+  });
+
+  // Prevent AI access if not logged in
+  aiBtn.addEventListener("click", (e) => {
+    if (!isLoggedIn()) {
+      e.preventDefault();
+      loginModal.style.display = "block";
+    }
+  });
+
+  // Handle login submit (DEMO)
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    // Demo validation (replace with real backend later)
+    if (email.length < 4 || password.length < 4) {
+      loginMsg.textContent = "Enter a valid email and password.";
+      return;
+    }
+
+    localStorage.setItem("netfoodix_logged_in", "true");
+    loginModal.style.display = "none";
+    updateUI();
+    alert("✅ Logged in! You can now use Netfoodix AI.");
+  });
+
+  // Initialize
+  updateUI();
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("netfoodix_logged_in");
+  updateUI();
+  alert("Logged out.");
+});
+
+</script>
 </body>
 </html>
