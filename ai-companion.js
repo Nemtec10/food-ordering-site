@@ -4,8 +4,9 @@ const aiClose = document.querySelector(".ai-close");
 const aiForm = document.querySelector(".ai-form");
 const aiInput = document.querySelector(".ai-input");
 const aiMessages = document.querySelector(".ai-messages");
+const aiMode = document.querySelector(".ai-mode");
 
-const responses = [
+const fallbackResponses = [
   {
     keywords: ["price", "pricing", "cost", "plan", "subscription"],
     answer:
@@ -36,17 +37,45 @@ const responses = [
 const defaultAnswer =
   "Great question! I can help with ordering, delivery, support, and pricing. Try asking about delivery time, support, or signing in.";
 
-const appendMessage = (text, type = "user") => {
+const conversation = [
+  {
+    role: "system",
+    content:
+      "You are Netfoodix AI, a friendly assistant for a food ordering app. Be concise, helpful, and practical.",
+  },
+];
+
+const appendMessage = ({ text, type = "user", imageUrl, isLoading = false }) => {
   const message = document.createElement("div");
   message.className = `ai-message ai-message--${type}`;
-  message.textContent = text;
+  if (isLoading) {
+    message.classList.add("ai-message--loading");
+    message.dataset.loading = "true";
+  }
+
+  if (imageUrl) {
+    const image = document.createElement("img");
+    image.src = imageUrl;
+    image.alt = text || "Generated image";
+    message.appendChild(image);
+  } else {
+    message.textContent = text;
+  }
+
   aiMessages.appendChild(message);
   aiMessages.scrollTop = aiMessages.scrollHeight;
 };
 
-const getResponse = (message) => {
+const removeLoadingMessage = () => {
+  const loading = aiMessages.querySelector('[data-loading="true"]');
+  if (loading) {
+    loading.remove();
+  }
+};
+
+const getFallbackResponse = (message) => {
   const normalized = message.toLowerCase();
-  const match = responses.find((item) =>
+  const match = fallbackResponses.find((item) =>
     item.keywords.some((keyword) => normalized.includes(keyword))
   );
   return match ? match.answer : defaultAnswer;
@@ -63,6 +92,16 @@ const closePanel = () => {
   aiFab.setAttribute("aria-expanded", "false");
 };
 
+const updatePlaceholder = () => {
+  if (!aiMode) {
+    return;
+  }
+  aiInput.placeholder =
+    aiMode.value === "image"
+      ? "Describe the image you want to create..."
+      : "Ask about delivery, pricing, or support...";
+};
+
 aiFab.addEventListener("click", () => {
   if (aiPanel.classList.contains("is-open")) {
     closePanel();
@@ -73,17 +112,76 @@ aiFab.addEventListener("click", () => {
 
 aiClose.addEventListener("click", closePanel);
 
-aiForm.addEventListener("submit", (event) => {
+aiMode?.addEventListener("change", updatePlaceholder);
+updatePlaceholder();
+
+aiForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const message = aiInput.value.trim();
   if (!message) {
     return;
   }
-  appendMessage(message, "user");
-  aiInput.value = "";
 
-  const reply = getResponse(message);
-  window.setTimeout(() => appendMessage(reply, "bot"), 300);
+  appendMessage({ text: message, type: "user" });
+  aiInput.value = "";
+  appendMessage({ text: "Thinking…", type: "bot", isLoading: true });
+
+  const mode = aiMode?.value || "chat";
+
+  try {
+    if (mode === "image") {
+      const response = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: message }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Image request failed");
+      }
+
+      const data = await response.json();
+      removeLoadingMessage();
+      appendMessage({
+        text: message,
+        type: "bot",
+        imageUrl: data.image,
+      });
+      return;
+    }
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        history: conversation.slice(-6),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Chat request failed");
+    }
+
+    const data = await response.json();
+    const reply = data.reply || defaultAnswer;
+    conversation.push({ role: "user", content: message });
+    conversation.push({ role: "assistant", content: reply });
+    removeLoadingMessage();
+    appendMessage({ text: reply, type: "bot" });
+  } catch (error) {
+    removeLoadingMessage();
+    if (mode === "image") {
+      appendMessage({
+        text:
+          "I couldn't generate an image right now. Please run the server with a valid OPENAI_API_KEY.",
+        type: "bot",
+      });
+      return;
+    }
+    const reply = getFallbackResponse(message);
+    appendMessage({ text: reply, type: "bot" });
+  }
 });
 
 document.addEventListener("keydown", (event) => {
