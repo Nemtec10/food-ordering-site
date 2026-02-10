@@ -1,173 +1,241 @@
-import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import rateLimit from "express-rate-limit";
+import express from "express";
 import OpenAI from "openai";
+import { DatabaseSync } from "node:sqlite";
+import { randomUUID } from "node:crypto";
 
 dotenv.config();
 
 const app = express();
-app.use(express.json({ limit: "2mb" }));
+const port = process.env.PORT || 3000;
+const apiKey = process.env.OPENAI_API_KEY;
+const client = apiKey ? new OpenAI({ apiKey }) : null;
 
-// ✅ Replace "*" with your real domain later (security)
-app.use(cors({ origin: "*" }));
+const systemPrompt =
+  "You are Netfoodix AI, a friendly assistant for a food ordering app. Be concise, helpful, and practical.";
 
-// ✅ Basic rate limiting to control spam/cost
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
-  })
-);
+const db = new DatabaseSync("./netfoodix-ai.db");
+db.exec(`
+  CREATE TABLE IF NOT EXISTS conversations (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    title TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+  );
 
-// ---- Simple in-memory sessions (works locally). For production use Redis/DB. ----
-const sessions = new Map();
-function getHistory(sessionId) {
-  if (!sessions.has(sessionId)) sessions.set(sessionId, []);
-  return sessions.get(sessionId);
-}
-function pushHistory(sessionId, role, content) {
-  const h = getHistory(sessionId);
-  h.push({ role, content });
-  // keep last 20 messages to control cost
-  if (h.length > 20) h.splice(0, h.length - 20);
-}
+  CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+  CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+`);
 
-app.get("/ping", (req, res) => res.send("pong"));
+const statements = {
+  getConversation: db.prepare(
+    "SELECT id FROM conversations WHERE id = ? AND user_id = ?"
+  ),
+  insertConversation: db.prepare(
+    "INSERT INTO conversations (id, user_id, title) VALUES (?, ?, ?)"
+  ),
+  listConversations: db.prepare(`
+    SELECT id, user_id as userId, title, created_at as createdAt, updated_at as updatedAt
+    FROM conversations
+    WHERE user_id = ?
+    ORDER BY updated_at DESC
+  `),
+  listMessages: db.prepare(`
+    SELECT id, role, content, created_at as createdAt
+    FROM messages
+    WHERE conversation_id = ?
+    ORDER BY id ASC
+  `),
+  insertMessage: db.prepare(
+    "INSERT INTO messages (conversation_id, role, content) VALUES (?, ?, ?)"
+  ),
+  touchConversation: db.prepare(
+    "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+  ),
+  loadRecentMessages: db.prepare(`
+    SELECT role, content
+    FROM messages
+    WHERE conversation_id = ?
+    ORDER BY id DESC
+    LIMIT 20
+  `),
+};
 
-/**
- * POST /chat
- * Body: { message: string, sessionId?: string }
- * Returns: { reply: string }
- */
-app.post("/chat", async (req, res) => {
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static("."));
+
+const ensureConversation = (userId, conversationId, firstMessage = "") => {
+  let id = conversationId;
+
+  if (id) {
+    const existing = statements.getConversation.get(id, userId);
+    if (existing) {
+      return id;
+    }
+  }
+
+  id = randomUUID();
+  const title = firstMessage.slice(0, 80) || "Netfoodix chat";
+  statements.insertConversation.run(id, userId, title);
+  return id;
+};
+
+app.get("/api/conversations/:userId", (req, res) => {
   try {
-    const message = String(req.body?.message || "").trim();
-    const sessionId = String(req.body?.sessionId || "default");
-
-    if (!message) return res.status(400).json({ error: "Message is empty" });
-
-    const system = `
-You are Netfoodix AI Companion (food ordering assistant).
-- Detect the user's language and reply in the SAME language.
-- Be human-like, friendly, and helpful.
-- If asked about ordering: give clear steps.
-- If asked something outside Netfoodix: still help as best as you can.
-- If you need missing info: ask 1 short follow-up question.
-`.trim();
-
-    // load memory
-    const history = getHistory(sessionId);
-
-    const response = await client.responses.create({
-      model: MODEL,
-      input: [
-        { role: "system", content: system },
-        ...history,
-        { role: "user", content: message },
-      ],
-    });
-
-    const reply = response.output_text || "Sorry, I couldn't reply.";
-    pushHistory(sessionId, "user", message);
-    pushHistory(sessionId, "assistant", reply);
-
-    res.json({ reply });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Server error" });
+    const rows = statements.listConversations.all(req.params.userId);
+    res.json({ conversations: rows });
+  } catch {
+    res.status(500).json({ error: "Failed to load conversations." });
   }
 });
 
-/**
- * POST /chat-stream  (ChatGPT typing effect)
- * Body: { message: string, sessionId?: string }
- * Response: Server-Sent Events (SSE)
- */
-app.post("/chat-stream", async (req, res) => {
+app.get("/api/messages/:conversationId", (req, res) => {
   try {
-    const message = String(req.body?.message || "").trim();
-    const sessionId = String(req.body?.sessionId || "default");
-    if (!message) return res.status(400).end("Message is empty");
-
-    // SSE headers
-    res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
-    res.setHeader("Cache-Control", "no-cache, no-transform");
-    res.setHeader("Connection", "keep-alive");
-
-    const system = `
-You are Netfoodix AI Companion.
-Reply in the user's language. Be friendly and natural.
-`.trim();
-
-    const history = getHistory(sessionId);
-
-    // Stream tokens as they arrive
-    const stream = await client.responses.stream({
-      model: MODEL,
-      input: [
-        { role: "system", content: system },
-        ...history,
-        { role: "user", content: message },
-      ],
-    });
-
-    let finalText = "";
-
-    stream.on("response.output_text.delta", (event) => {
-      const chunk = event.delta || "";
-      finalText += chunk;
-      res.write(`data: ${JSON.stringify({ delta: chunk })}\n\n`);
-    });
-
-    stream.on("response.completed", () => {
-      pushHistory(sessionId, "user", message);
-      pushHistory(sessionId, "assistant", finalText);
-      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-      res.end();
-    });
-
-    stream.on("error", (err) => {
-      console.error(err);
-      res.write(`data: ${JSON.stringify({ error: "stream error" })}\n\n`);
-      res.end();
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(500).end("Server error");
+    const rows = statements.listMessages.all(req.params.conversationId);
+    res.json({ messages: rows });
+  } catch {
+    res.status(500).json({ error: "Failed to load messages." });
   }
 });
 
-/**
- * POST /image  (text → image)
- * Body: { prompt: string, size?: "1024x1024"|"1024x1536"|"1536x1024" }
- * Returns: { imageBase64: string }
- */
-app.post("/image", async (req, res) => {
+app.post("/api/conversations", (req, res) => {
+  const { userId, title = "New conversation" } = req.body || {};
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required." });
+  }
+
   try {
-    const prompt = String(req.body?.prompt || "").trim();
-    const size = String(req.body?.size || "1024x1024").trim();
+    const conversationId = randomUUID();
+    statements.insertConversation.run(conversationId, userId, title);
+    res.status(201).json({ conversationId });
+  } catch {
+    res.status(500).json({ error: "Failed to create conversation." });
+  }
+});
 
-    if (!prompt) return res.status(400).json({ error: "Prompt is empty" });
+app.post("/api/chat/stream", async (req, res) => {
+  const { userId, conversationId, message } = req.body || {};
 
-    const img = await client.images.generate({
+  if (!userId || !message) {
+    return res.status(400).json({ error: "userId and message are required." });
+  }
+
+  const activeConversationId = ensureConversation(userId, conversationId, message);
+  statements.insertMessage.run(activeConversationId, "user", message);
+  statements.touchConversation.run(activeConversationId);
+
+  if (!client) {
+    return res.status(500).json({
+      error: "Missing OPENAI_API_KEY in environment.",
+      conversationId: activeConversationId,
+    });
+  }
+
+  const history = statements.loadRecentMessages.all(activeConversationId);
+  const inputHistory = history.reverse().map((item) => ({
+    role: item.role === "assistant" ? "assistant" : "user",
+    content: item.content,
+  }));
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  let fullReply = "";
+
+  try {
+    const stream = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      stream: true,
+      messages: [{ role: "system", content: systemPrompt }, ...inputHistory],
+    });
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices?.[0]?.delta?.content || "";
+      if (delta) {
+        fullReply += delta;
+        res.write(`data: ${JSON.stringify({ delta })}\n\n`);
+      }
+    }
+
+    if (!fullReply.trim()) {
+      fullReply = "I couldn't generate a reply this time. Please try again.";
+      res.write(`data: ${JSON.stringify({ delta: fullReply })}\n\n`);
+    }
+
+    statements.insertMessage.run(activeConversationId, "assistant", fullReply);
+    statements.touchConversation.run(activeConversationId);
+    res.write(
+      `data: ${JSON.stringify({ done: true, conversationId: activeConversationId })}\n\n`
+    );
+    res.end();
+  } catch {
+    res.write(
+      `data: ${JSON.stringify({ error: "Failed to generate a streamed response." })}\n\n`
+    );
+    res.end();
+  }
+});
+
+app.post("/api/image", async (req, res) => {
+  const { userId, conversationId, prompt } = req.body || {};
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required." });
+  }
+
+  if (!client) {
+    return res
+      .status(500)
+      .json({ error: "Missing OPENAI_API_KEY in environment." });
+  }
+
+  try {
+    const image = await client.images.generate({
       model: "gpt-image-1",
       prompt,
-      size,
+      size: "1024x1024",
     });
 
-    const imageBase64 = img.data?.[0]?.b64_json;
-    if (!imageBase64) return res.status(500).json({ error: "No image returned" });
+    const base64 = image.data?.[0]?.b64_json;
+    if (!base64) {
+      return res.status(500).json({ error: "No image returned." });
+    }
 
-    res.json({ imageBase64 });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Image generation failed" });
+    let activeConversationId = conversationId;
+    if (userId) {
+      activeConversationId = ensureConversation(userId, conversationId, prompt);
+      statements.insertMessage.run(
+        activeConversationId,
+        "user",
+        `Image request: ${prompt}`
+      );
+      statements.insertMessage.run(
+        activeConversationId,
+        "assistant",
+        "Generated an image for your prompt."
+      );
+      statements.touchConversation.run(activeConversationId);
+    }
+
+    res.json({
+      image: `data:image/png;base64,${base64}`,
+      conversationId: activeConversationId,
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to generate an image." });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Netfoodix AI API running at http://localhost:${PORT}`));
+app.listen(port, () => {
+  console.log(`Netfoodix AI server running at http://localhost:${port}`);
+});
