@@ -181,40 +181,6 @@ const pageSectionI18n = {
   }
 };
 
-
-
-const optionI18n = {
-  en: {
-    languages: { en: 'English', sw: 'Swahili', fr: 'French', pt: 'Portuguese', zu: 'Zulu', es: 'Spanish', de: 'German', zh: 'Chinese', ar: 'Arabic' },
-    themes: { dark: 'Dark', light: 'Light', sun: 'Sun', emerald: 'Emerald', green: 'Green', blue: 'Blue', orange: 'Orange', purple: 'Purple' },
-    backgrounds: { none: 'None', 'S2.png': 'Food 1', 'S5.png': 'Food 2', 'S9.png': 'Food 3' }
-  },
-  ar: {
-    languages: { en: 'الإنجليزية', sw: 'السواحيلية', fr: 'الفرنسية', pt: 'البرتغالية', zu: 'الزولو', es: 'الإسبانية', de: 'الألمانية', zh: 'الصينية', ar: 'العربية' },
-    themes: { dark: 'داكن', light: 'فاتح', sun: 'شمسي', emerald: 'زمردي', green: 'أخضر', blue: 'أزرق', orange: 'برتقالي', purple: 'أرجواني' },
-    backgrounds: { none: 'بدون', 'S2.png': 'طعام 1', 'S5.png': 'طعام 2', 'S9.png': 'طعام 3' }
-  }
-};
-
-const localizeSelectOptions = (lang) => {
-  const dict = { ...optionI18n.en, ...(optionI18n[lang] || {}) };
-  if (languageSelect) {
-    [...languageSelect.options].forEach((opt) => {
-      opt.textContent = (dict.languages || optionI18n.en.languages)[opt.value] || opt.value;
-    });
-  }
-  if (themeSelect) {
-    [...themeSelect.options].forEach((opt) => {
-      opt.textContent = (dict.themes || optionI18n.en.themes)[opt.value] || opt.value;
-    });
-  }
-  if (bgSelect) {
-    [...bgSelect.options].forEach((opt) => {
-      opt.textContent = (dict.backgrounds || optionI18n.en.backgrounds)[opt.value] || opt.value;
-    });
-  }
-};
-
 const getCurrentLanguage = () => languageSelect?.value || localStorage.getItem(LANGUAGE_KEY) || 'en';
 const t = (key, lang = getCurrentLanguage()) => (i18n[lang] && i18n[lang][key]) || i18n.en[key] || key;
 
@@ -240,7 +206,6 @@ const applyLanguage = (lang) => {
       el.setAttribute('aria-label', dict[key]);
     }
   });
-  localizeSelectOptions(lang);
 };
 
 const applyTheme = (theme) => {
