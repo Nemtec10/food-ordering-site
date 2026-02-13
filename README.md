@@ -1,5 +1,5 @@
-# food-ordering-site
-Static HTML/CSS website for a food ordering app.
+# NETFOODIX AI webapp
+The AI reliable online website for a food ordering app.
 
 ## Deploy Netfoodix AI with HTTPS (recommended)
 Because AI chat/image now requires a Node.js backend, deploy on a full-stack host (Render/Railway), not GitHub Pages.
