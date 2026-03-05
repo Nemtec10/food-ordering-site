@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netfoodix Restaurant Partner Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="restaurant-partner.css" />
+</head>
+<body>
+  <main class="partner-shell">
+    <header class="partner-head">
+      <a class="back-link" href="sub-index.html" aria-label="Back to Netfoodix home">← Back</a>
+      <div>
+        <p class="eyebrow">Restaurant Growth Portal</p>
+        <h1>Join Netfoodix and publish your latest services and blog updates</h1>
+        <p class="lede">
+          Register your restaurant profile once, then keep users updated with new menu services, promotions,
+          and blog stories in one place.
+        </p>
+      </div>
+    </header>
+
+    <section class="partner-grid">
+      <article class="panel form-panel">
+        <h2>Restaurant Registration</h2>
+        <p class="panel-note">Fields marked with * are required.</p>
+
+        <form id="partnerForm" class="partner-form">
+          <div class="field-grid two-col">
+            <label>
+              Restaurant name *
+              <input id="restaurantName" name="restaurantName" type="text" placeholder="e.g. Mama Ntilie Kitchen" required />
+            </label>
+            <label>
+              Owner / manager *
+              <input id="ownerName" name="ownerName" type="text" placeholder="e.g. Amina Juma" required />
+            </label>
+          </div>
+
+          <div class="field-grid two-col">
+            <label>
+              Business email *
+              <input id="email" name="email" type="email" placeholder="restaurant@email.com" required />
+            </label>
+            <label>
+              Phone number *
+              <input id="phone" name="phone" type="tel" placeholder="+255..." required />
+            </label>
+          </div>
+
+          <div class="field-grid two-col">
+            <label>
+              City / area *
+              <input id="city" name="city" type="text" placeholder="Dodoma" required />
+            </label>
+            <label>
+              Price range *
+              <select id="priceTier" name="priceTier" required>
+                <option value="Budget">Budget</option>
+                <option value="Mid-range" selected>Mid-range</option>
+                <option value="Premium">Premium</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Full address *
+            <input id="address" name="address" type="text" placeholder="Street, ward, city" required />
+          </label>
+
+          <label>
+            Opening hours *
+            <input id="hours" name="hours" type="text" placeholder="Mon-Sun: 07:00 - 23:00" required />
+          </label>
+
+          <fieldset class="chip-group">
+            <legend>Cuisine types *</legend>
+            <label><input type="checkbox" name="cuisine" value="Local Meals" checked /> Local Meals</label>
+            <label><input type="checkbox" name="cuisine" value="Pizza" /> Pizza</label>
+            <label><input type="checkbox" name="cuisine" value="Burgers" /> Burgers</label>
+            <label><input type="checkbox" name="cuisine" value="Drinks" /> Drinks</label>
+            <label><input type="checkbox" name="cuisine" value="Desserts" /> Desserts</label>
+            <label><input type="checkbox" name="cuisine" value="Seafood" /> Seafood</label>
+            <label><input type="checkbox" name="cuisine" value="Vegan" /> Vegan</label>
+            <label><input type="checkbox" name="cuisine" value="Fast Food" /> Fast Food</label>
+          </fieldset>
+
+          <fieldset class="chip-group">
+            <legend>Food services offered *</legend>
+            <label><input type="checkbox" name="service" value="Delivery" checked /> Delivery</label>
+            <label><input type="checkbox" name="service" value="Pickup" checked /> Pickup</label>
+            <label><input type="checkbox" name="service" value="Dine-in" /> Dine-in</label>
+            <label><input type="checkbox" name="service" value="Catering" /> Catering</label>
+            <label><input type="checkbox" name="service" value="Pre-order" /> Pre-order</label>
+            <label><input type="checkbox" name="service" value="Scheduled delivery" /> Scheduled delivery</label>
+          </fieldset>
+
+          <div class="field-grid two-col">
+            <label>
+              Signature dish *
+              <input id="signatureDish" name="signatureDish" type="text" placeholder="Chips Mayai Special" required />
+            </label>
+            <label>
+              Signature price (TZS) *
+              <input id="signaturePrice" name="signaturePrice" type="number" min="500" step="100" value="4500" required />
+            </label>
+          </div>
+
+          <div class="field-grid two-col">
+            <label>
+              Profile photo / logo
+              <input id="logoFile" name="logoFile" type="file" accept="image/*" />
+            </label>
+            <label>
+              Cover image
+              <input id="coverFile" name="coverFile" type="file" accept="image/*" />
+            </label>
+          </div>
+
+          <hr class="splitter" />
+
+          <h3>Publish latest update for users</h3>
+          <div class="field-grid two-col">
+            <label>
+              Update title *
+              <input id="updateTitle" name="updateTitle" type="text" placeholder="Weekend family combo launched" required />
+            </label>
+            <label>
+              Effective date *
+              <input id="updateDate" name="updateDate" type="date" required />
+            </label>
+          </div>
+
+          <label>
+            Update summary / short blog *
+            <textarea id="updateBody" name="updateBody" rows="4" placeholder="Tell users what is new this week..." required></textarea>
+          </label>
+
+          <label>
+            Blog link (optional)
+            <input id="blogUrl" name="blogUrl" type="url" placeholder="https://..." />
+          </label>
+
+          <div class="form-actions">
+            <button id="publishBtn" type="submit">Publish Restaurant Profile</button>
+            <button id="resetBtn" class="ghost" type="button">Clear Form</button>
+          </div>
+          <p id="formStatus" class="status" aria-live="polite"></p>
+        </form>
+
+        <section class="status-tracker">
+          <h3>Application Status Tracker</h3>
+          <p class="panel-note">Use your business email to check review status and continue setup after approval.</p>
+          <div class="tracker-row">
+            <input id="statusEmail" type="email" placeholder="restaurant@email.com" />
+            <button id="checkStatusBtn" type="button" class="ghost">Check Status</button>
+          </div>
+          <p id="statusResult" class="status" aria-live="polite"></p>
+          <div id="statusActions" class="status-actions is-hidden">
+            <a id="setupLink" class="back-link" href="#" target="_blank" rel="noreferrer">Complete Setup</a>
+            <a id="publicLink" class="back-link" href="#" target="_blank" rel="noreferrer">Open Public Page</a>
+          </div>
+          <ul id="checklistList" class="checklist-list"></ul>
+        </section>
+      </article>
+
+      <article class="panel preview-panel">
+        <div class="preview-head">
+          <h2>Live Preview</h2>
+          <span class="chip">Visible to users</span>
+        </div>
+        <div id="profilePreview" class="profile-preview"></div>
+
+        <div class="feed-head">
+          <h3>Latest Restaurant Updates</h3>
+          <div class="feed-actions">
+            <input id="feedSearch" type="search" placeholder="Search by restaurant, city, service..." />
+            <button id="refreshFeedBtn" type="button" class="ghost">Refresh</button>
+            <a class="back-link" href="restaurant-admin.html" target="_blank" rel="noreferrer">Admin Review</a>
+          </div>
+        </div>
+        <div id="updatesFeed" class="updates-feed"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="restaurant-partner.js"></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+:root {
+  --bg: #071124;
+  --panel: #102848;
+  --line: #2f5481;
+  --text: #e7f3ff;
+  --muted: #99b7d8;
+  --accent: #44d8a8;
+  --accent2: #58bcff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #050d1f 0%, #091a34 58%, #050b18 100%);
+  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.setup-shell {
+  width: min(1160px, 96vw);
+  margin: 20px auto 30px;
+  display: grid;
+  gap: 12px;
+}
+
+.back {
+  color: #cce6ff;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
+  width: fit-content;
+  background: rgba(10, 22, 44, 0.94);
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(12, 30, 56, 0.94);
+}
+
+.muted {
+  color: var(--muted);
+  margin: 4px 0;
+}
+
+.status {
+  color: #9fe8d2;
+}
+
+.checklist {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.check-row {
+  border: 1px solid #365d8d;
+  border-radius: 10px;
+  padding: 8px 9px;
+  background: rgba(8, 21, 42, 0.95);
+  font-size: 13px;
+}
+
+.check-row.done {
+  border-color: #4aa88c;
+  color: #a8ebd8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #0b1d38;
+  color: var(--text);
+  padding: 10px;
+  font: inherit;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #062139;
+}
+
+.list {
+  margin-top: 9px;
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  border: 1px solid #355c8b;
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(8, 21, 42, 0.95);
+}
+
+.item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.item img {
+  margin-top: 7px;
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.is-hidden {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+}

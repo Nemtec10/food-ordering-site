@@ -1,0 +1,169 @@
+:root {
+  --bg: #071124;
+  --panel: #102848;
+  --line: #2f5481;
+  --text: #e7f3ff;
+  --muted: #99b7d8;
+  --accent: #43d7a7;
+  --accent2: #59bbff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #050d1f 0%, #091a34 60%, #050b18 100%);
+  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.page {
+  width: min(1160px, 96vw);
+  margin: 20px auto 30px;
+  display: grid;
+  gap: 12px;
+}
+
+.back {
+  color: #cae6ff;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
+  width: fit-content;
+  background: rgba(11, 27, 50, 0.93);
+}
+
+.hero {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(15, 35, 66, 0.94);
+}
+
+.cover {
+  min-height: 180px;
+  background: linear-gradient(120deg, rgba(89, 187, 255, 0.3), rgba(67, 215, 167, 0.28));
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-body {
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.logo {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #09233f;
+  background-image: linear-gradient(130deg, #43d7a7, #59bbff, #ffc56d, #ff8ca8, #7ea4ff, #43d7a7);
+  background-size: 300% 300%;
+  animation: restaurantLogoHue 8s ease infinite;
+}
+
+.logo.has-image {
+  color: transparent;
+  font-size: 0;
+  background-image: var(--logo-image);
+  background-size: cover;
+  background-position: center;
+  animation: none;
+}
+
+@keyframes restaurantLogoHue {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+h1, h2 {
+  margin: 0;
+}
+
+.meta {
+  margin: 4px 0;
+  color: var(--muted);
+}
+
+.summary {
+  margin: 0;
+  color: #cae3fb;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(11, 27, 50, 0.94);
+}
+
+.menu,
+.posts {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.menu-item,
+.post-item {
+  border: 1px solid #355c8b;
+  border-radius: 12px;
+  padding: 9px;
+  background: rgba(8, 21, 42, 0.95);
+}
+
+.menu-item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.menu-item img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #355c8b;
+  margin-top: 7px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.empty {
+  border: 1px dashed #466f9f;
+  border-radius: 10px;
+  padding: 14px;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

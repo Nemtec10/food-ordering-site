@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netfoodix Admin Review Panel</title>
+  <link rel="stylesheet" href="restaurant-admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-head">
+      <a class="back" href="restaurant-partner.html">← Partner Portal</a>
+      <h1>Admin Review Panel</h1>
+      <p>Review new registrations, approve/reject, and send rejection messages.</p>
+    </header>
+
+    <section class="admin-card auth-card">
+      <label for="adminKeyInput">Admin review key</label>
+      <div class="row">
+        <input id="adminKeyInput" type="password" placeholder="Enter admin key" />
+        <button id="loadBtn" type="button">Load Registrations</button>
+      </div>
+      <p id="adminStatus" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="admin-card">
+      <div class="toolbar">
+        <div class="tabs">
+          <button class="tab is-active" data-status="pending_review">Pending</button>
+          <button class="tab" data-status="approved">Approved</button>
+          <button class="tab" data-status="rejected">Rejected</button>
+          <button class="tab" data-status="all">All</button>
+        </div>
+        <input id="searchInput" type="search" placeholder="Search restaurant, city, owner, email..." />
+      </div>
+      <div id="adminList" class="admin-list"></div>
+    </section>
+
+    <section id="reviewPanel" class="admin-card is-hidden">
+      <h2>Review Registration</h2>
+      <div id="reviewInfo" class="review-info"></div>
+
+      <label for="reviewMessage">Admin message (optional)</label>
+      <textarea id="reviewMessage" rows="3" placeholder="Message shown to restaurant..."></textarea>
+
+      <label for="rejectReason">Rejection reason (required if reject)</label>
+      <textarea id="rejectReason" rows="3" placeholder="Reason for rejection"></textarea>
+
+      <div class="row">
+        <button id="approveBtn" type="button">Approve</button>
+        <button id="rejectBtn" type="button" class="danger">Reject</button>
+      </div>
+      <p id="reviewStatus" class="status" aria-live="polite"></p>
+      <div id="reviewLinks" class="review-links is-hidden">
+        <a id="publicUrlLink" href="#" target="_blank" rel="noreferrer">Open Public Page</a>
+        <a id="setupUrlLink" href="#" target="_blank" rel="noreferrer">Open Setup Page</a>
+      </div>
+    </section>
+
+    <section class="admin-card" id="earningsPanel">
+      <div class="toolbar">
+        <h2>Restaurant Earnings</h2>
+        <button id="refreshEarningsBtn" type="button">Refresh earnings</button>
+      </div>
+      <p id="earningsSummary" class="status" aria-live="polite"></p>
+      <div id="earningsList" class="admin-list"></div>
+    </section>
+  </main>
+
+  <script src="restaurant-admin.js"></script>
+</body>
+</html>

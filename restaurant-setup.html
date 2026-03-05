@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netfoodix Restaurant Setup</title>
+  <link rel="stylesheet" href="restaurant-setup.css" />
+</head>
+<body>
+  <main class="setup-shell">
+    <header class="setup-head">
+      <a class="back" href="restaurant-partner.html">← Partner Portal</a>
+      <h1>Restaurant Setup Checklist</h1>
+      <p>Complete setup after approval: add menu items, publish blogs/promotions, and manage availability.</p>
+    </header>
+
+    <section class="card">
+      <h2 id="setupTitle">Loading...</h2>
+      <p id="setupMeta" class="muted"></p>
+      <div id="checklist" class="checklist"></div>
+      <p id="setupStatus" class="status" aria-live="polite"></p>
+      <a id="setupPublicLink" class="back is-hidden" href="#" target="_blank" rel="noreferrer">Open Public Page</a>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>Add Menu Item</h3>
+        <div class="row">
+          <input id="menuName" type="text" placeholder="Item name" />
+          <input id="menuPrice" type="number" min="500" step="100" placeholder="Price TZS" />
+        </div>
+        <input id="menuImage" type="file" accept="image/*" />
+        <button id="addMenuBtn" type="button">Add Item</button>
+        <div id="menuList" class="list"></div>
+      </article>
+
+      <article class="card">
+        <h3>Publish Blog / Promotion</h3>
+        <input id="postTitle" type="text" placeholder="Title" />
+        <textarea id="postBody" rows="4" placeholder="Write update details..."></textarea>
+        <input id="postUrl" type="url" placeholder="Optional link" />
+        <button id="addPostBtn" type="button">Publish Post</button>
+        <div id="postList" class="list"></div>
+      </article>
+    </section>
+  </main>
+  <script src="restaurant-setup.js"></script>
+</body>
+</html>

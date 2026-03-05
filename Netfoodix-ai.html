@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netfoodix AI</title>
+  <link rel="stylesheet" href="Netfoodix-ai.css" />
+</head>
+<body>
+  <main class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-topbar">
+        <div class="sidebar-shortcuts" aria-label="Sidebar shortcuts">
+          <button id="shortcutProfileBtn" class="icon-btn" type="button" title="Profile" aria-label="Profile">&#128100;</button>
+          <button id="shortcutSettingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">&#9881;</button>
+          <button id="shortcutHistoryBtn" class="icon-btn" type="button" title="Chat history" aria-label="Chat history">&#128172;</button>
+        </div>
+        <div class="sidebar-top-actions">
+          <button id="sidebarHideBtn" class="icon-btn sidebar-ctrl-btn" type="button" title="Hide sidebar" aria-label="Hide sidebar">&#9664;</button>
+          <button id="sidebarCloseBtn" class="icon-btn sidebar-ctrl-btn" type="button" title="Close sidebar" aria-label="Close sidebar">&times;</button>
+        </div>
+      </div>
+      <div class="sidebar-mini-label" aria-hidden="true">AI</div>
+      <h1>Netfoodix AI</h1>
+      <p>Order help, restaurant tips, delivery support, and bill calculations.</p>
+      <p><small>TSX source: <code>Netfoodix-ai.tsx</code></small></p>
+
+      <section class="card profile-pill" id="profileCard">
+        <div id="profileAvatar" class="profile-avatar" role="img" aria-label="Profile avatar">G</div>
+        <div>
+          <strong id="profileHandle">guest</strong>
+          <small id="profileEmail">Not logged in</small>
+        </div>
+      </section>
+
+      <section class="card settings-panel is-hidden" id="accountCard" aria-hidden="true">
+        <strong>Account and AI settings</strong>
+        <input id="profileUsername" placeholder="Profile username (@foodie)" maxlength="30" readonly disabled title="Username is locked after login." />
+        <label class="file-label" for="aiMode">
+          AI mode
+          <select id="aiMode">
+            <option value="auto">Auto</option>
+            <option value="deep">Deep-Thinking</option>
+            <option value="instant">Instant</option>
+          </select>
+        </label>
+        <label class="file-label" for="profilePhotoInput">
+          Profile photo
+          <input id="profilePhotoInput" type="file" accept="image/*" />
+        </label>
+        <div class="row compact-row">
+          <button id="removeProfilePhotoBtn" class="ghost-btn" type="button">Remove profile photo</button>
+        </div>
+        <label class="file-label" for="backgroundPhotoInput">
+          Background theme photo
+          <input id="backgroundPhotoInput" type="file" accept="image/*" />
+        </label>
+        <div class="row compact-row">
+          <button id="removeBackgroundPhotoBtn" class="ghost-btn" type="button">Remove background photo</button>
+        </div>
+        <div class="row">
+          <button id="saveProfileBtn" type="button">Save profile</button>
+          <button id="logoutBtn" class="danger" type="button">Logout</button>
+        </div>
+        <small id="authStatus">Sign in from Ask Netfoodix AI to unlock this page.</small>
+      </section>
+
+      <section class="card" id="historyCard">
+        <div class="history-head">
+          <strong>Chat history</strong>
+          <div class="history-tools">
+            <button id="searchHistoryBtn" class="icon-btn" type="button" title="Search chats" aria-label="Search chats">&#128269;</button>
+            <button id="newChatBtn" class="icon-btn" type="button" title="New chat" aria-label="New chat">+</button>
+            <button id="showArchivedBtn" class="icon-btn" type="button" title="Show archived chats" aria-label="Show archived chats">&#128451;</button>
+            <button id="shareHistoryBtn" class="icon-btn" type="button" title="Share chat" aria-label="Share chat">&#128257;</button>
+            <button id="renameHistoryBtn" class="icon-btn" type="button" title="Rename chat" aria-label="Rename chat">&#9998;</button>
+            <button id="archiveHistoryBtn" class="icon-btn" type="button" title="Archive chat" aria-label="Archive chat">&#128230;</button>
+            <button id="unarchiveHistoryBtn" class="icon-btn" type="button" title="Unarchive chat" aria-label="Unarchive chat">&#128450;</button>
+          </div>
+        </div>
+        <input id="historySearchInput" class="history-search is-hidden" placeholder="Search your chats..." />
+        <div id="historyList" class="history-list"></div>
+      </section>
+
+      <section class="card shop-card" id="menuCard">
+        <div class="shop-head">
+          <strong>Menu / Browse</strong>
+          <small id="menuResultHint">Browse categories, prices, and add to cart.</small>
+        </div>
+        <div class="menu-tools">
+          <input id="foodSearchInput" placeholder="Search food (e.g. pasta, chicken, rice)" />
+          <div class="row">
+            <button id="foodSearchBtn" type="button">Search foods</button>
+            <button id="loadMoreFoodsBtn" class="ghost-btn" type="button">Load more</button>
+          </div>
+          <small id="foodSearchStatus">Try searching any food name.</small>
+        </div>
+        <div class="restaurant-tools">
+          <input id="restaurantSearchInput" placeholder="Browse restaurants by city or area" />
+          <div class="row">
+            <button id="restaurantSearchBtn" type="button">Find restaurants</button>
+            <button id="loadMoreRestaurantsBtn" class="ghost-btn" type="button">Load more restaurants</button>
+            <select id="restaurantSelect">
+              <option value="any">Any restaurant</option>
+            </select>
+          </div>
+          <small id="activeRestaurantText">Ordering from: Any restaurant</small>
+          <div id="restaurantResultsList" class="restaurant-results"></div>
+        </div>
+        <div class="transport-tools">
+          <label class="file-label" for="transportModeSelect">
+            Delivery transport
+            <select id="transportModeSelect">
+              <option value="motorcycle">Road - Motorcycle</option>
+              <option value="car"> Road - Car</option>
+              <option value="bus">Road - Bus</option>
+              <option value="air">Air</option>
+            </select>
+          </label>
+          <small id="transportEstimateText">Delivery options will appear after selecting a restaurant.</small>
+        </div>
+        <div id="menuCategories" class="menu-categories"></div>
+        <div id="menuGrid" class="menu-grid"></div>
+      </section>
+
+      <section class="card cart-card" id="cartCard">
+        <div class="shop-head">
+          <strong>Cart & Checkout</strong>
+          <span id="cartCountBadge" class="pill">0 items</span>
+        </div>
+        <div id="cartList" class="cart-list"><small>Your cart is empty.</small></div>
+        <div class="cart-totals">
+          <span>Subtotal</span>
+          <strong id="cartSubtotal">0 TZS</strong>
+        </div>
+        <div class="row">
+          <button id="checkoutBtn" type="button">Checkout</button>
+          <button id="continueChatBtn" class="ghost-btn" type="button">Continue chat</button>
+        </div>
+        <button id="clearCartBtn" class="ghost-btn" type="button">Clear cart</button>
+        <small id="cartStatus">Tip: Ask “best dinner under 5000 TZS”.</small>
+      </section>
+
+      <section class="card tracker-card" id="trackerCard">
+        <div class="shop-head">
+          <strong>Order Tracker</strong>
+          <span id="orderStatusPill" class="pill pill-muted">No active order</span>
+        </div>
+        <div class="tracker-grid">
+          <div class="tracker-stat">
+            <span>Order ID</span>
+            <strong id="orderIdText">-</strong>
+          </div>
+          <div class="tracker-stat">
+            <span>ETA</span>
+            <strong id="orderEtaText">-</strong>
+          </div>
+          <div class="tracker-stat">
+            <span>Driver</span>
+            <strong id="orderDriverText">-</strong>
+          </div>
+          <div class="tracker-stat">
+            <span>Driver phone</span>
+            <strong id="orderDriverPhoneText">-</strong>
+          </div>
+          <div class="tracker-stat">
+            <span>Departure</span>
+            <strong id="orderDepartureText">-</strong>
+          </div>
+          <div class="tracker-stat">
+            <span>Arrival</span>
+            <strong id="orderArrivalText">-</strong>
+          </div>
+        </div>
+        <div id="trackerTimeline" class="tracker-timeline"></div>
+        <button id="trackOrderBtn" class="ghost-btn" type="button">Where is my order?</button>
+      </section>
+
+      <section class="card settings-card settings-panel is-hidden" id="profileSettingsCard" aria-hidden="true">
+        <strong>User Profile / Settings</strong>
+        <label class="file-label" for="paymentMethodSelect">
+          Payment method
+          <select id="paymentMethodSelect">
+            <option value="card">Card</option>
+            <option value="mobile-money">Mobile Money</option>
+            <option value="cash">Cash on Delivery</option>
+          </select>
+        </label>
+        <label class="file-label" for="subscriptionTierSelect">
+          Subscription tier
+          <select id="subscriptionTierSelect">
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="elite">Elite</option>
+          </select>
+        </label>
+        <button id="viewOrderHistoryBtn" class="ghost-btn" type="button">View order history</button>
+        <div id="orderHistoryList" class="order-history-list"></div>
+      </section>
+    </aside>
+
+    <section class="chat">
+      <header class="chat-head">
+        <button id="sidebarOpenBtn" class="icon-btn sidebar-open-btn is-hidden" type="button" title="Open sidebar" aria-label="Open sidebar">&#9776;</button>
+        <div class="chat-head-left">
+          <strong><h2>Netfoodix AI</h2></strong>
+          <small id="chatMeta" class="chat-meta">Loading local time...</small>
+        </div>
+        <div class="row chat-head-tools">
+          <div id="weatherChip" class="weather-chip" title="Weather forecast">Weather: ...</div>
+          <select id="language">
+            <option value="auto">Auto</option>
+            <option value="en">English</option>
+            <option value="sw">Swahili</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="ar">Arabic</option>
+          </select>
+          <button id="themeDarkBtn" type="button" title="Dark theme" aria-label="Dark theme">&#127769;</button>
+          <button id="themeLightBtn" type="button" title="Light theme" aria-label="Light theme">&#9728;</button>
+          <button id="ttsBtn" type="button" title="Read replies aloud" aria-label="Read replies aloud" aria-pressed="true">&#128266;</button>
+          <button id="copyBtn" type="button" title="Copy chat">&#128203;</button>
+          <button id="editBtn" type="button" title="Edit input (10s)">&#9998;</button>
+          <button id="deleteBtn" type="button" title="Delete selected chat">&#128465;</button>
+        </div>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <form id="chatForm" class="composer">
+        <input id="messageInput" placeholder="Ask anything..." />
+        <button id="emojiBtn" type="button" title="Browse emojis" aria-label="Browse emojis" aria-pressed="false">&#128515;</button>
+        <button id="voiceBtn" type="button" title="Voice input" aria-label="Voice input">&#127908;</button>
+        <button type="submit" title="Send" aria-label="Send">&#10148;</button>
+
+        <div id="emojiPicker" class="emoji-picker is-hidden" role="dialog" aria-label="Emoji picker">
+          <div id="emojiGrid" class="emoji-grid" aria-label="Emoji results"></div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="Netfoodix-ai.js"></script>
+  <script src="auth-modal.js"></script>
+  
+</body>
+</html>
